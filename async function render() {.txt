@@ -1,0 +1,63 @@
+async function render() {
+  try {
+    // Fetch data from API
+    let response = await fetch(url, options);
+    let data = await response.json();
+    
+    // Extract relevant information from data
+    let flights = data.content.results.itineraries.map((itinerary) => {
+      let outboundLeg = itinerary.outboundLeg;
+      let inboundLeg = itinerary.inboundLeg;
+      let price = itinerary.pricingOptions[0].price;
+
+      return {
+        origin: outboundLeg.originStation.code,
+        destination: outboundLeg.destinationStation.code,
+        departureTime: outboundLeg.departure,
+        arrivalTime: inboundLeg.arrival,
+        price: price
+      };
+    });
+
+    // Generate HTML content for flights
+    let html = '';
+    flights.forEach((flight) => {
+      let htmlSegment = `<li>
+        <div class="detailsCard">
+          <div class="flightInfo">
+            <div class="time">
+              <div>
+                <h4>${new Date(flight.departureTime).toLocaleTimeString()}</h4>
+                <p>${flight.origin}</p>
+              </div>
+              <div>
+                <h4>${new Date(flight.arrivalTime).toLocaleTimeString()}</h4>
+                <p>${flight.destination}</p>
+              </div>
+            </div>
+            <div class="price">
+              <div>
+                <h4>JOD ${flight.price}</h4>
+              </div>
+              <div>
+                <p>round trip</p>
+              </div>
+            </div>
+            <div class="bookNowBtnContainer">
+              <div>
+                <button class="bookNowBtn">Book Now</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </li>`;
+      html += htmlSegment;
+    });
+
+    // Display HTML content on page
+    let container = document.querySelector('.mainList');
+    container.innerHTML = html;
+  } catch (error) {
+    console.error(error);
+  }
+}
